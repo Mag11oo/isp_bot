@@ -1,3 +1,4 @@
+from time import time
 import requests
 import datetime
 import cfg
@@ -23,11 +24,22 @@ def get_next():
         return f"Сегодня дежурят в столовой:\n{s[0]}, {s[1]}\nВ кабинетах:\n{s[2]}, {s[3]}\n"
     return nid
 
+def get_nnext():
+    s = []
+    nid = get_nid(days+1)
+    if nid:
+        for i in range (4):
+            s.append(students[(nid+i-1)%26])
+        return f"Завтра дежурят в столовой:\n{s[0]}, {s[1]}\nВ кабинетах:\n{s[2]}, {s[3]}\n"
+    return nid
+
 def send_msg(text):
     if text:
         results = requests.get(f"https://api.telegram.org/bot{cfg.token}/sendMessage?chat_id={cfg.chat_id}&text={text}" )
         print(results.json())
 
 
-
-send_msg(get_next())
+if datetime.datetime.now().hour > 12:
+    send_msg(get_nnext())
+else:
+    send_msg(get_next())
